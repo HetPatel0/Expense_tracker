@@ -5,7 +5,9 @@ import { Button } from '@/components/ui/button'
 import React, { useEffect } from 'react'
 import { ModeToggle } from './modetoggle'
 import { authClient } from '@/lib/auth-client'
-import { signOutAction } from '@/actions/auth'
+
+import { redirect } from 'next/navigation'
+import Image from 'next/image'
 
 
 
@@ -21,6 +23,7 @@ export const HeroHeader =() => {
     const  {data:session,isPending} =   authClient.useSession()
     const handleLogOut =async () =>{
        await  authClient.signOut()
+       redirect('/')
        
     }
 
@@ -32,8 +35,8 @@ export const HeroHeader =() => {
         <header>
             <nav
                 data-state={menuState && 'active'}
-                className="bg-background/50 fixed z-20 w-full border-b backdrop-blur-3xl">
-                <div className="mx-auto max-w-6xl px-6 transition-all duration-300">
+                className="bg-background/50 sticky z-20 w-full border-b backdrop-blur-3xl">
+                <div className="mx-auto   max-w-6xl px-6 transition-all duration-300">
                     <div className="relative flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4">
                         <div className="flex w-full items-center justify-between gap-12 lg:w-auto">
                             <Link
@@ -41,6 +44,7 @@ export const HeroHeader =() => {
                                 aria-label="home"
                                 className="flex items-center space-x-2">
                                 {/* <Logo /> */}
+                                <Image src='/Stackup.png' width={60} height={60}alt='logo' />
                             </Link>
 
                             <button
@@ -112,9 +116,9 @@ export const HeroHeader =() => {
                                         <span>Sign Up</span>
                                     </Link>
                                 </Button>
-                                <ModeToggle/>
                             </div>
                             }
+                            <ModeToggle/>
                             
                         </div>
                     </div>

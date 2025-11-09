@@ -1,8 +1,20 @@
+import Dashboard from "@/components/Dashboard";
 import HeroSection from "@/components/hero-section";
-import Image from "next/image";
+import { getSession } from "@/lib/server";
 
-export default function Home() {
+
+export default async function Home() {
+  const session =await getSession()
   return (
-     <HeroSection/>
+    <div className="">
+
+    {
+      !session?
+      <HeroSection/>:
+      <div className="  mt-20">
+        <Dashboard/>
+      </div>
+    }
+    </div>
   );
 }
