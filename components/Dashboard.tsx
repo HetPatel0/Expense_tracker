@@ -3,13 +3,15 @@ import React, { use } from 'react'
 import AddRecord from './AddNewRecord';
 import RecordChart from './RecordChart';
 import ExpenseStats from './ExpenseStats';
+import AIInsights from './AIInsights';
+import RecordHistory from './RecordHistory';
 
 async function Dashboard() {
       const session =await getSession();
       const user = session?.user
 
   return (
-      <main className='  text-gray-800 dark:text-gray-400 font-sans min-h-screen transition-colors duration-300 md:ml-60 '>
+      <main className='  text-gray-800 dark:text-gray-400 font-sans min-h-screen transition-colors duration-300 md:ml-auto flex items-center justify-center '>
       <div className='max-w-7xl  px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8 '>
         {/* Mobile-first responsive grid */}
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6'>
@@ -50,8 +52,8 @@ async function Dashboard() {
                 </p>
                 {/* Mobile-optimized badge grid */}
                 <div className='flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center sm:justify-start'>
-                  <div className='bg-linear-to-r from-emerald-50 to-green-50 dark:from-emerald-900/30 dark:to-green-900/30 border border-emerald-100 dark:border-emerald-800 px-3 py-2 rounded-xl flex items-center gap-2 justify-center sm:justify-start'>
-                    <div className='w-5 h-5 sm:w-6 sm:h-6 bg-linear-to-r from-emerald-500 to-green-500 rounded-lg flex items-center justify-center shrink-0'>
+                  <div className='bg-linear-to-r from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30 border border-blue-100 dark:border-blue-800 px-3 py-2 rounded-xl flex items-center gap-2 justify-center sm:justify-start'>
+                    <div className='w-5 h-5 sm:w-6 sm:h-6 bg-linear-to-r from-blue-500 to-sky-500 rounded-lg flex items-center justify-center shrink-0'>
                       <span className='text-white text-xs'>📅</span>
                     </div>
                     <div className='text-center sm:text-left'>
@@ -63,8 +65,8 @@ async function Dashboard() {
                       </span>
                     </div>
                   </div>
-                  <div className='bg-linear-to-r from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 border border-green-100 dark:border-green-800 px-3 py-2 rounded-xl flex items-center gap-2 justify-center sm:justify-start'>
-                    <div className='w-5 h-5 sm:w-6 sm:h-6 bg-linear-to-r from-green-500 to-emerald-500 rounded-lg flex items-center justify-center shrink-0'>
+                  <div className='bg-linear-to-r from-sky-50 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/30 border border-sky-100 dark:border-blue-800 px-3 py-2 rounded-xl flex items-center gap-2 justify-center sm:justify-start'>
+                    <div className='w-5 h-5 sm:w-6 sm:h-6 bg-linear-to-r from-sky-500 to-blue-500 rounded-lg flex items-center justify-center shrink-0'>
                       <span className='text-white text-xs'>⚡</span>
                     </div>
                     <div className='text-center sm:text-left'>
@@ -95,8 +97,8 @@ async function Dashboard() {
 
         {/* Full-width sections below - mobile-friendly spacing */}
         <div className='mt-6 sm:mt-8 space-y-4 sm:space-y-6'>
-          {/* <AIInsights /> */}
-          {/* <RecordHistory /> */}
+          <AIInsights />
+          <RecordHistory />
         </div>
       </div>
       </main>

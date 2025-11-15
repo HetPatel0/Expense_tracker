@@ -7,7 +7,7 @@ async function getBestWorstExpense(): Promise<{
     error?: string;
 }> {
     const session = await getSession()
-    const userId = session?.session.id
+    const userId = session?.user.id
     if (!userId) {
         return { error: "user not found" }
     }
