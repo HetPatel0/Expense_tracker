@@ -1,13 +1,15 @@
 import { getSession } from '@/lib/server';
 import React, { use } from 'react'
 import AddRecord from './AddNewRecord';
+import RecordChart from './RecordChart';
+import ExpenseStats from './ExpenseStats';
 
 async function Dashboard() {
       const session =await getSession();
       const user = session?.user
 
   return (
-     <main className='  text-gray-800 dark:text-gray-400 font-sans min-h-screen transition-colors duration-300 ml-40 '>
+      <main className='  text-gray-800 dark:text-gray-400 font-sans min-h-screen transition-colors duration-300 md:ml-60 '>
       <div className='max-w-7xl  px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8 '>
         {/* Mobile-first responsive grid */}
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6'>
@@ -17,11 +19,17 @@ async function Dashboard() {
             <div className='bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-4 sm:p-6 lg:p-8 rounded-2xl shadow-xl border border-gray-100/50 dark:border-gray-700/50 hover:shadow-2xl flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6'>
               {/* User Image - responsive sizing */}
               <div className='relative shrink-0'>
-                <img
-                  src={user?.image? user.image:'./public/logo.png'}
+                {
+                  user?.image ?   <img
+                  src={ user.image}
                   alt={`${user?.name}profile`}
                   className='w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-white dark:border-gray-600 shadow-lg'
-                />
+                />:
+                <div>
+                  {''}
+                </div>
+                }
+              
                 <div className='absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-linear-to-r rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center'>
                   <span className='text-white text-xs'>✓</span>
                 </div>
@@ -32,7 +40,7 @@ async function Dashboard() {
                 <div className='flex flex-col sm:flex-row items-center sm:items-start justify-center sm:justify-start gap-2 sm:gap-3 mb-3'>
                   
                   <h2 className='text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                    Welcome Back, {user?.name}!
+                    Welcome Back, {user?.name} !
                   </h2>
                 </div>
                 <p className='text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6 max-w-md mx-auto sm:mx-0'>
@@ -80,8 +88,8 @@ async function Dashboard() {
           {/* Right Column - Stacked below on mobile */}
           <div className='space-y-4 sm:space-y-6'>
             {/* Expense Analytics */}
-            {/* <RecordChart /> */}
-            {/* <ExpenseStats /> */}
+            <RecordChart />
+            <ExpenseStats/>
           </div>
         </div>
 
