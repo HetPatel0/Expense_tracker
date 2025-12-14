@@ -4,7 +4,7 @@ import { getSession } from "@/lib/server";
 
 
 export default async function Home() {
-  const session =await getSession()
+  const session = await getSession()
   return (
     <div className="">
 

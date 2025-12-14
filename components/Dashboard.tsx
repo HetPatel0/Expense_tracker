@@ -3,7 +3,7 @@ import React, { use } from 'react'
 import AddRecord from './AddNewRecord';
 import RecordChart from './RecordChart';
 import ExpenseStats from './ExpenseStats';
-import AIInsights from './AIInsights';
+
 import RecordHistory from './RecordHistory';
 
 async function Dashboard() {
@@ -18,7 +18,7 @@ async function Dashboard() {
           {/* Left Column - Stacked on mobile */}
           <div className='space-y-4 sm:space-y-6'>
             {/* Welcome section with improved mobile layout */}
-            <div className='bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-4 sm:p-6 lg:p-8 rounded-2xl shadow-xl border border-gray-100/50 dark:border-gray-700/50 hover:shadow-2xl flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6'>
+            <div className=' backdrop-blur-sm p-4 sm:p-6 lg:p-8 rounded-2xl shadow-xl  hover:shadow-2xl flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6'>
               {/* User Image - responsive sizing */}
               <div className='relative shrink-0'>
                 {
@@ -97,7 +97,7 @@ async function Dashboard() {
 
         {/* Full-width sections below - mobile-friendly spacing */}
         <div className='mt-6 sm:mt-8 space-y-4 sm:space-y-6'>
-          <AIInsights />
+          
           <RecordHistory />
         </div>
       </div>

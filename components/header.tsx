@@ -93,7 +93,7 @@ export const HeroHeader =() => {
                               </div>
 
                                <Button onClick={handleLogOut}>
-                                SignOut<LogOut/>
+                                <LogOut/>
 
                                </Button> 
                               </div>

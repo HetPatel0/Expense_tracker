@@ -1,5 +1,6 @@
 import getBestWorstExpense from '@/actions/getBestWorstExpense';
 import getUserRecord from '@/actions/getUserRecord';
+import { FileChartColumn } from 'lucide-react';
 import React from 'react';
 
 const ExpenseStats = async () => {
@@ -20,10 +21,10 @@ const ExpenseStats = async () => {
     const averageExpense = validRecord / validDays;
 
     return (
-      <div className='bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-xl border border-gray-100/50 dark:border-gray-700/50 hover:shadow-2xl'>
+      <div className=' backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-xl  hover:shadow-2xl'>
         <div className='flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6'>
-          <div className='w-8 h-8 sm:w-10 sm:h-10 bg-linear-to-br from-emerald-500 via-green-500 to-teal-500 rounded-xl flex items-center justify-center shadow-lg'>
-            <span className='text-white text-sm sm:text-lg'>📊</span>
+          <div className='w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 rounded-xl flex items-center justify-center shadow-lg'>
+            <span className='text-white text-sm sm:text-lg'> <FileChartColumn/> </span>
           </div>
           <div>
             <h3 className='text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100'>
@@ -37,7 +38,7 @@ const ExpenseStats = async () => {
 
         <div className='space-y-3 sm:space-y-4'>
           {/* Average Daily Spending */}
-          <div className='bg-linear-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-600 rounded-xl p-3 sm:p-4 border border-gray-200/50 dark:border-gray-600/50'>
+          <div className=' bg-linear-to-r from-blue-50/50 to-sky-50/50 dark:from-blue-900/10 dark:to-sky-900/10 rounded-xl border border-blue-100/50 dark:border-blue-800/50'>
             <div className='text-center'>
               <p className='text-xs font-medium text-gray-600 dark:text-gray-300 mb-2 tracking-wide uppercase'>
                 Average Daily Spending

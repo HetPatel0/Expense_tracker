@@ -4,11 +4,13 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { authClient } from '@/lib/auth-client'
+import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 export default function SignUpPage() {
+    const  {isPending }=authClient.useSession();
     const router = useRouter()
         const [email,setEmail] =useState("")
         const [name,setName] =useState("")
@@ -39,7 +41,7 @@ export default function SignUpPage() {
                             aria-label="go home">
                            {/* logo */}
                         </Link>
-                        <h1 className="mb-1 mt-4 text-xl font-semibold">Create a somethin app Account</h1>
+                        <h1 className="mb-1 mt-4 text-xl font-semibold">Create a StackUP Account</h1>
                         <p className="text-sm">Welcome! Create an account to get started</p>
                     </div>
 
@@ -98,18 +100,23 @@ export default function SignUpPage() {
                             />
                         </div>
 
-                        <Button className="w-full mt-4" type='submit'  onClick={handleSignUp}>Continue</Button>
+                        <Button className="w-full mt-4" type='submit'  onClick={handleSignUp}>  {
+                                isPending ? <Loader2 className=' animate-spin ' /> : "Continue"
+                            }</Button>
                     </div>
                 </div>
 
-                <div className="bg-muted rounded-(--radius) border p-3">
+                <div className="bg-muted rounded-lg border p-3">
                     <p className="text-accent-foreground text-center text-sm">
                         Have an account ?
+                      
                         <Button
                             asChild
                             variant="link"
                             className="px-2">
-                            <Link href="/login">Sign In</Link>
+                            <Link href="/login">
+                            
+                            Sign In</Link>
                         </Button>
                     </p>
                 </div>

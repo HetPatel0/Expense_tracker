@@ -4,11 +4,15 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { authClient } from '@/lib/auth-client'
+import { on } from 'events'
+import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { redirect, useRouter } from 'next/navigation'
 import { useState } from 'react'
 
 export default function LoginPage() {
+    
+    const  {isPending }=authClient.useSession();
     const router = useRouter()
     const [email,setEmail] =useState("")
     const [pss,setPss] =useState("")
@@ -21,8 +25,13 @@ export default function LoginPage() {
 },{
     onSuccess:(ctx)=>{
       router.push('/')
+    },
+    onError:(err)=>{
+      console.log("error",err)
+      
     }
-}
+},
+
 
 )
 }
@@ -41,7 +50,7 @@ export default function LoginPage() {
                             aria-label="go home">
                             {/* logog here */}
                         </Link>
-                        <h1 className="mb-1 mt-4 text-xl font-semibold">Sign In to Tailark</h1>
+                        <h1 className="mb-1 mt-4 text-xl font-semibold">Sign In to StackUP</h1>
                         <p className="text-sm">Welcome back! Sign in to continue</p>
                     </div>
 
@@ -92,11 +101,13 @@ export default function LoginPage() {
                             />
                         </div>
 
-                        <Button className="w-full"  type='submit' onClick={handleSignIn} >Sign In</Button>
+                        <Button className="w-full"  type='submit' onClick={handleSignIn} >  {
+                                isPending ? <Loader2 className='animate-spin' /> : "SignIn"
+                            }</Button>
                     </div>
                 </div>
 
-                <div className="bg-muted rounded-(--radius) border p-3">
+                <div className="bg-muted rounded-lg border p-3">
                     <p className="text-accent-foreground text-center text-sm">
                         Don't have an account ?
                         <Button

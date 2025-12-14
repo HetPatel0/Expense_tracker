@@ -40,7 +40,7 @@ const RecordHistory = async () => {
 
   if (!records || records.length === 0) {
     return (
-      <div className='bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-xl border border-gray-100/50 dark:border-gray-700/50'>
+      <div className=' backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-xl '>
         <div className='flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6'>
           <div className='w-8 h-8 sm:w-10 sm:h-10 bg-linear-to-br from-emerald-500 via-green-500 to-teal-500 rounded-xl flex items-center justify-center shadow-lg'>
             <span className='text-white text-sm sm:text-lg'>📝</span>
@@ -71,7 +71,7 @@ const RecordHistory = async () => {
   }
 
   return (
-    <div className='bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-xl border border-gray-100/50 dark:border-gray-700/50 hover:shadow-2xl'>
+    <div className=' backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-xl hover:shadow-2xl'>
       <div className='flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6'>
         <div className='w-8 h-8 sm:w-10 sm:h-10 bg-linear-to-br from-emerald-500 via-green-500 to-teal-500 rounded-xl flex items-center justify-center shadow-lg'>
           <span className='text-white text-sm sm:text-lg'>📝</span>

@@ -2,6 +2,7 @@
 import { useRef, useState } from 'react';
 import addExpenseRecord from '@/actions/addExpenseRecord';
 import { suggestCategory } from '@/actions/suggestCategory';
+import { CreditCard } from 'lucide-react';
 
 const AddRecord = () => {
   const formRef = useRef<HTMLFormElement>(null);
@@ -66,10 +67,10 @@ const AddRecord = () => {
   };
 
   return (
-    <div className='bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm p-4 sm:p-6 rounded-2xl shadow-xl border border-gray-100/50 dark:border-gray-700/50 hover:shadow-2xl'>
+    <div className=' p-4 sm:p-6 rounded-2xl shadow-xl  hover:shadow-2xl  '>
       <div className='flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6'>
-        <div className='w-8 h-8 sm:w-10 sm:h-10 bg-linear-to-br from-blue-500 via-sky-500 to-indigo-500 rounded-xl flex items-center justify-center shadow-lg'>
-          <span className='text-white text-sm sm:text-lg'>💳</span>
+        <div className='w-8 h-8 sm:w-10 sm:h-10 bg-blue-500 rounded-xl flex items-center justify-center shadow-lg'>
+          <span className='text-white text-sm sm:text-lg'><CreditCard/></span>
         </div>
         <div>
           <h3 className='text-lg sm:text-xl font-bold text-gray-900 dark:text-gray-100 leading-tight'>
@@ -119,7 +120,7 @@ const AddRecord = () => {
                 title='AI Category Suggestion'
               >
                 {isCategorizingAI ? (
-                  <div className='w-3 h-3 border-2 border-white/30 border-t-white rounded-full animate-spin'></div>
+                  <div className='w-3 h-3 border-2 border-white/30 rounded-full animate-spin'></div>
                 ) : (
                   <span className='text-xs'>✨</span>
                 )}
@@ -159,11 +160,11 @@ const AddRecord = () => {
           <div className='space-y-1.5'>
             <label
               htmlFor='category'
-              className='flex items-center gap-2 text-xs font-semibold text-gray-700 dark:text-gray-300 tracking-wide'
+              className='flex items-center gap-2 text-xs font-semibold text-gray-700 dark:text-gray-300 tracking-wide '
             >
               <span className='w-1.5 h-1.5 bg-blue-500 rounded-full'></span>
               Category
-              <span className='text-xs text-gray-400 dark:text-gray-500 ml-2 font-normal hidden sm:inline'>
+              <span className='text-xs text-gray-400 dark:text-gray-500 ml-2 font-normal hidden sm:inline '>
                 Use the ✨ button above for AI suggestions
               </span>
             </label>
@@ -183,43 +184,43 @@ const AddRecord = () => {
                 Select category...
               </option>
               <option value='Food' className='text-gray-900 dark:text-gray-100'>
-                🍔 Food & Dining
+                 Food & Dining
               </option>
               <option
                 value='Transportation'
                 className='text-gray-900 dark:text-gray-100'
               >
-                🚗 Transportation
+                 Transportation
               </option>
               <option
                 value='Shopping'
                 className='text-gray-900 dark:text-gray-100'
               >
-                🛒 Shopping
+                Shopping
               </option>
               <option
                 value='Entertainment'
                 className='text-gray-900 dark:text-gray-100'
               >
-                🎬 Entertainment
+                Entertainment
               </option>
               <option
                 value='Bills'
                 className='text-gray-900 dark:text-gray-100'
               >
-                💡 Bills & Utilities
+                Bills & Utilities
               </option>
               <option
                 value='Healthcare'
                 className='text-gray-900 dark:text-gray-100'
               >
-                🏥 Healthcare
+                 Healthcare
               </option>
               <option
                 value='Other'
                 className='text-gray-900 dark:text-gray-100'
               >
-                📦 Other
+                Other
               </option>
             </select>
           </div>
@@ -237,8 +238,8 @@ const AddRecord = () => {
               </span>
             </label>
             <div className='relative'>
-              <span className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 font-medium text-sm ml-1'>
-                Rs 
+              <span className='absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 dark:text-gray-400 font-medium text-sm ml-1 '>
+                 Rs  
               </span>
               <input
                 type='number'
@@ -260,7 +261,7 @@ const AddRecord = () => {
         {/* Submit Button */}
         <button
           type='submit'
-          className='w-full relative overflow-hidden bg-linear-to-r from-blue-600 via-sky-500 to-indigo-500 hover:from-blue-700 hover:via-sky-600 hover:to-indigo-600 text-white px-4 py-3 sm:px-5 sm:py-4 rounded-xl font-semibold shadow-xl hover:shadow-2xl group transition-all duration-300 border-2 border-transparent hover:border-white/20 text-sm sm:text-base'
+          className='w-full relative overflow-hidden bg-blue-500 text-white px-4 py-3 sm:px-5 sm:py-4 rounded-xl font-semibold shadow-xl hover:shadow-2xl group transition-all duration-300 border-2 border-transparent hover:border-white/20 text-sm sm:text-base '
           disabled={isLoading}
         >
           <div className='relative flex items-center justify-center gap-2'>
