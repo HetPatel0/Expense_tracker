@@ -1,7 +1,5 @@
 'use server'
 import { auth } from "@/lib/auth";
-import { authClient } from "@/lib/auth-client";
-import { body } from "motion/react-client";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -20,7 +18,6 @@ export async function signUpAction(formData:FormData) {
         },
         headers: await headers()
     })
-     await authClient.getSession()
      
      redirect('/');
      
@@ -28,13 +25,7 @@ export async function signUpAction(formData:FormData) {
     export async function signInAction(formData:FormData) {
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
-        await authClient.signIn.email({
-            email:email,
-            password:password,
-            rememberMe:true
-        })
-        
-        
+
         await auth.api.signInEmail({
             body:{
                 email,
@@ -47,8 +38,6 @@ export async function signUpAction(formData:FormData) {
         
     }
     export async function signOutAction() {
-        
-        await authClient.signOut()
         await auth.api.signOut({
             headers: await headers()
         })

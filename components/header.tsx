@@ -2,11 +2,11 @@
 import Link from 'next/link'
 import { LogOut, Menu, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import React, { useEffect } from 'react'
+import React from 'react'
 import { ModeToggle } from './modetoggle'
 import { authClient } from '@/lib/auth-client'
 
-import { redirect } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import Image from 'next/image'
 
 
@@ -20,10 +20,12 @@ const menuItems = [
 
 export const HeroHeader =() => {
     const [menuState, setMenuState] = React.useState(false)
+    const router = useRouter()
     const  {data:session,isPending} =   authClient.useSession()
     const handleLogOut =async () =>{
        await  authClient.signOut()
-       redirect('/')
+       router.push('/')
+       router.refresh()
        
     }
 

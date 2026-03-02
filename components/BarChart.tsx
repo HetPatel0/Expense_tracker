@@ -33,12 +33,11 @@ interface Record {
 const BarChart = ({ records }: { records: Record[] }) => {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const [windowWidth, setWindowWidth] = useState(1024); // Default to desktop width
+  const [windowWidth, setWindowWidth] = useState(() =>
+    typeof window === 'undefined' ? 1024 : window.innerWidth
+  );
 
   useEffect(() => {
-    // Set initial window width
-    setWindowWidth(window.innerWidth);
-
     // Add resize listener
     const handleResize = () => {
       setWindowWidth(window.innerWidth);

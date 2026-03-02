@@ -1,46 +1,50 @@
 'use client'
-import { signInAction } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { authClient } from '@/lib/auth-client'
-import { on } from 'events'
 import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
-import { redirect, useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { type FormEvent, useState } from 'react'
 
 export default function LoginPage() {
-    
-    const  {isPending }=authClient.useSession();
     const router = useRouter()
     const [email,setEmail] =useState("")
     const [pss,setPss] =useState("")
-  const  handleSignIn= async(e:any)=>{
+    const [isSubmitting, setIsSubmitting] = useState(false)
+    const [errorMessage, setErrorMessage] = useState("")
+
+  const  handleSignIn= async(e: FormEvent<HTMLFormElement>)=>{
     e.preventDefault();
-    const { data, error } = await authClient.signIn.email({
-    email: email, // required
-    password: pss, // required
-    rememberMe: true,
-},{
-    onSuccess:(ctx)=>{
+    setErrorMessage("")
+    setIsSubmitting(true)
+    try {
+      const { error } = await authClient.signIn.email({
+        email,
+        password: pss,
+        rememberMe: true,
+      })
+
+      if (error) {
+        setErrorMessage(error.message || "Unable to sign in. Please try again.")
+        setIsSubmitting(false)
+        return
+      }
+
       router.push('/')
-    },
-    onError:(err)=>{
-      console.log("error",err)
-      
+      router.refresh()
+    } catch {
+      setErrorMessage("Unable to sign in. Please try again.")
+      setIsSubmitting(false)
     }
-},
-
-
-)
-}
+  }
  
 
     return (
         <section className="flex min-h-screen bg-zinc-50 px-4 py-16 md:py-32 dark:bg-transparent">
             <form
-                action={signInAction}
+                onSubmit={handleSignIn}
               
                 className="bg-card m-auto h-fit w-full max-w-sm rounded-[calc(var(--radius)+.125rem)] border p-0.5 shadow-md dark:[--color-muted:var(--color-zinc-900)]">
                 <div className="p-8 pb-6">
@@ -101,15 +105,19 @@ export default function LoginPage() {
                             />
                         </div>
 
-                        <Button className="w-full"  type='submit' onClick={handleSignIn} >  {
-                                isPending ? <Loader2 className='animate-spin' /> : "SignIn"
+                        {errorMessage ? (
+                          <p className="text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
+                        ) : null}
+
+                        <Button className="w-full"  type='submit' disabled={isSubmitting} >  {
+                                isSubmitting ? <Loader2 className='animate-spin' /> : "SignIn"
                             }</Button>
                     </div>
                 </div>
 
                 <div className="bg-muted rounded-lg border p-3">
                     <p className="text-accent-foreground text-center text-sm">
-                        Don't have an account ?
+                        Don&apos;t have an account ?
                         <Button
                             asChild
                             variant="link"

@@ -1,5 +1,4 @@
 'use client'
-import {  signUpAction } from '@/actions/auth'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -7,32 +6,44 @@ import { authClient } from '@/lib/auth-client'
 import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { type FormEvent, useState } from 'react'
 
 export default function SignUpPage() {
-    const  {isPending }=authClient.useSession();
     const router = useRouter()
         const [email,setEmail] =useState("")
         const [name,setName] =useState("")
         const [pss,setPss] =useState("")
-      const  handleSignUp= async(e:any)=>{
+        const [isSubmitting, setIsSubmitting] = useState(false)
+        const [errorMessage, setErrorMessage] = useState("")
+
+      const  handleSignUp= async(e: FormEvent<HTMLFormElement>)=>{
         e.preventDefault();
-        const { data, error } = await authClient.signUp.email({
-        email: email, // required
-        password: pss, // required
-        name:name
-    },{
-        onSuccess:(ctx)=>{
+        setErrorMessage("")
+        setIsSubmitting(true)
+        try {
+          const { error } = await authClient.signUp.email({
+            email,
+            password: pss,
+            name
+          })
+
+          if (error) {
+            setErrorMessage(error.message || "Unable to create account. Please try again.")
+            setIsSubmitting(false)
+            return
+          }
+
           router.push('/')
+          router.refresh()
+        } catch {
+          setErrorMessage("Unable to create account. Please try again.")
+          setIsSubmitting(false)
         }
-    }
-    
-    )
     }
     return (
         <section className="flex min-h-screen bg-zinc-50 px-4 py-16 md:py-32 dark:bg-transparent">
             <form
-                action={signUpAction}
+                onSubmit={handleSignUp}
                 className="bg-card m-auto h-fit w-full max-w-sm rounded-[calc(var(--radius)+.125rem)] border p-0.5 shadow-md dark:[--color-muted:var(--color-zinc-900)]">
                 <div className="p-8 pb-6">
                     <div>
@@ -100,8 +111,12 @@ export default function SignUpPage() {
                             />
                         </div>
 
-                        <Button className="w-full mt-4" type='submit'  onClick={handleSignUp}>  {
-                                isPending ? <Loader2 className=' animate-spin ' /> : "Continue"
+                        {errorMessage ? (
+                          <p className="text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
+                        ) : null}
+
+                        <Button className="w-full mt-4" type='submit' disabled={isSubmitting}>  {
+                                isSubmitting ? <Loader2 className=' animate-spin ' /> : "Continue"
                             }</Button>
                     </div>
                 </div>
