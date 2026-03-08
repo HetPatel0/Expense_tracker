@@ -11,7 +11,7 @@ export default async function Home() {
     {
       !session?
       <HeroSection/>:
-      <div className="  mt-20">
+      <div>
         <Dashboard/>
       </div>
     }

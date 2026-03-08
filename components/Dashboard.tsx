@@ -1,110 +1,131 @@
 import { getSession } from '@/lib/server';
-import React, { use } from 'react'
 import AddRecord from './AddNewRecord';
 import RecordChart from './RecordChart';
 import ExpenseStats from './ExpenseStats';
-
 import RecordHistory from './RecordHistory';
+import { InfiniteSlider } from './ui/infinite-slider';
+import { ProgressiveBlur } from './ui/progressive-blur';
+import { Activity, CalendarDays, ShieldCheck, Sparkles } from 'lucide-react';
+
+const tickerItems = [
+  'Track daily spending with clear trends',
+  'Get AI-assisted category suggestions',
+  'Spot best and worst expense ranges',
+  'Keep your budget decisions data-driven',
+];
 
 async function Dashboard() {
-      const session =await getSession();
-      const user = session?.user
+  const session = await getSession();
+  const user = session?.user;
+  const userName = user?.name || 'there';
+  const joinedDate = user?.createdAt
+    ? new Date(user.createdAt).toLocaleDateString()
+    : 'Not available';
+  const lastActive = user?.updatedAt
+    ? new Date(user.updatedAt).toLocaleDateString()
+    : 'Today';
 
   return (
-      <main className='  text-gray-800 dark:text-gray-400 font-sans min-h-screen transition-colors duration-300 md:ml-auto flex items-center justify-center '>
-      <div className='max-w-7xl  px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8 '>
-        {/* Mobile-first responsive grid */}
+    <main className='min-h-[calc(100vh-4.5rem)] px-4 py-6 text-slate-900 transition-colors duration-300 dark:text-slate-100 sm:px-6 lg:px-8'>
+      <div className='mx-auto max-w-7xl'>
         <div className='grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6'>
-          {/* Left Column - Stacked on mobile */}
           <div className='space-y-4 sm:space-y-6'>
-            {/* Welcome section with improved mobile layout */}
-            <div className=' backdrop-blur-sm p-4 sm:p-6 lg:p-8 rounded-2xl shadow-xl  hover:shadow-2xl flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6'>
-              {/* User Image - responsive sizing */}
-              <div className='relative shrink-0'>
-                {
-                  user?.image ?   <img
-                  src={ user.image}
-                  alt={`${user?.name}profile`}
-                  className='w-16 h-16 sm:w-20 sm:h-20 rounded-2xl border-2 border-white dark:border-gray-600 shadow-lg'
-                />:
-                <div>
-                  {''}
-                </div>
-                }
-              
-                <div className='absolute -bottom-1 -right-1 w-5 h-5 sm:w-6 sm:h-6 bg-linear-to-r rounded-full border-2 border-white dark:border-gray-800 flex items-center justify-center'>
-                  <span className='text-white text-xs'>✓</span>
-                </div>
-              </div>
+            <div className='rounded-3xl border border-slate-200/70 bg-white/70 p-4 shadow-lg shadow-slate-200/60 backdrop-blur-xl transition-all duration-300 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/70 dark:shadow-none sm:p-6 lg:p-8'>
+              <div className='flex flex-col gap-5'>
+                <div className='flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6'>
+                  <div className='relative mx-auto shrink-0 sm:mx-0'>
+                    {user?.image ? (
+                      <img
+                        src={user.image}
+                        alt={`${user?.name} profile`}
+                        className='h-16 w-16 rounded-2xl border-2 border-white shadow-lg sm:h-20 sm:w-20 dark:border-slate-700'
+                      />
+                    ) : (
+                      <div className='flex h-16 w-16 items-center justify-center rounded-2xl bg-linear-to-br from-slate-800 to-slate-700 text-lg font-semibold text-white shadow-lg dark:from-sky-600 dark:to-blue-600 sm:h-20 sm:w-20 sm:text-xl'>
+                        {userName.charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <div className='absolute -bottom-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-emerald-500 sm:h-6 sm:w-6 dark:border-slate-900'>
+                      <ShieldCheck className='h-3.5 w-3.5 text-white sm:h-4 sm:w-4' />
+                    </div>
+                  </div>
 
-              {/* User Details - responsive text and layout */}
-              <div className='flex-1 text-center sm:text-left'>
-                <div className='flex flex-col sm:flex-row items-center sm:items-start justify-center sm:justify-start gap-2 sm:gap-3 mb-3'>
-                  
-                  <h2 className='text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-gray-100'>
-                    Welcome Back, {user?.name} !
-                  </h2>
+                  <div className='flex-1 text-center sm:text-left'>
+                    <p className='mb-2 inline-flex items-center gap-2 rounded-full border border-sky-200/70 bg-sky-100/70 px-3 py-1 text-xs font-medium text-sky-700 dark:border-sky-900/60 dark:bg-sky-950/50 dark:text-sky-300'>
+                      <Sparkles className='h-3.5 w-3.5' />
+                      Dashboard Overview
+                    </p>
+                    <h2 className='text-xl font-bold leading-tight text-gray-900 dark:text-gray-100 sm:text-2xl lg:text-3xl'>
+                      Welcome back, {userName}.
+                    </h2>
+                    <p className='mx-auto mt-2 max-w-md text-sm text-gray-600 dark:text-gray-300 sm:mx-0 sm:text-base'>
+                      Keep your spending in control with real-time insights,
+                      cleaner tracking, and smarter category suggestions.
+                    </p>
+                  </div>
                 </div>
-                <p className='text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4 sm:mb-6 max-w-md mx-auto sm:mx-0'>
-                  Here&#39;s a quick overview of your recent expense activity.
-                  Track your spending, analyze patterns, and manage your budget
-                  efficiently!
-                </p>
-                {/* Mobile-optimized badge grid */}
-                <div className='flex flex-col sm:flex-row gap-2 sm:gap-3 justify-center sm:justify-start'>
-                  <div className='bg-linear-to-r from-blue-50 to-sky-50 dark:from-blue-900/30 dark:to-sky-900/30 border border-blue-100 dark:border-blue-800 px-3 py-2 rounded-xl flex items-center gap-2 justify-center sm:justify-start'>
-                    <div className='w-5 h-5 sm:w-6 sm:h-6 bg-linear-to-r from-blue-500 to-sky-500 rounded-lg flex items-center justify-center shrink-0'>
-                      <span className='text-white text-xs'>📅</span>
-                    </div>
-                    <div className='text-center sm:text-left'>
-                      <span className='text-xs font-medium text-gray-500 dark:text-gray-400 block'>
-                        Joined
-                      </span>
-                      <span className='text-sm font-semibold text-gray-800 dark:text-gray-200'>
-                        { user?.createdAt? new Date(user?.createdAt).toLocaleDateString():"not known"}
-                      </span>
-                    </div>
+
+                <div className='grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3'>
+                  <div className='rounded-2xl border border-slate-200/70 bg-slate-50/75 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/70'>
+                    <p className='mb-1 inline-flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400'>
+                      <CalendarDays className='h-3.5 w-3.5' />
+                      Joined
+                    </p>
+                    <p className='text-sm font-semibold text-gray-900 dark:text-gray-100'>
+                      {joinedDate}
+                    </p>
                   </div>
-                  <div className='bg-linear-to-r from-sky-50 to-blue-50 dark:from-sky-900/30 dark:to-blue-900/30 border border-sky-100 dark:border-blue-800 px-3 py-2 rounded-xl flex items-center gap-2 justify-center sm:justify-start'>
-                    <div className='w-5 h-5 sm:w-6 sm:h-6 bg-linear-to-r from-sky-500 to-blue-500 rounded-lg flex items-center justify-center shrink-0'>
-                      <span className='text-white text-xs'>⚡</span>
-                    </div>
-                    <div className='text-center sm:text-left'>
-                      <span className='text-xs font-medium text-gray-500 dark:text-gray-400 block'>
-                        Last Active
-                      </span>
-                      <span className='text-sm font-semibold text-gray-800 dark:text-gray-200'>
-                        {user?.updatedAt
-                          ? new Date(user.updatedAt).toLocaleDateString()
-                          : 'Today'}
-                      </span>
-                    </div>
+                  <div className='rounded-2xl border border-slate-200/70 bg-slate-50/75 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/70'>
+                    <p className='mb-1 inline-flex items-center gap-1 text-xs font-medium text-gray-500 dark:text-gray-400'>
+                      <Activity className='h-3.5 w-3.5' />
+                      Last Active
+                    </p>
+                    <p className='text-sm font-semibold text-gray-900 dark:text-gray-100'>
+                      {lastActive}
+                    </p>
                   </div>
+                </div>
+
+                <div className='relative overflow-hidden rounded-2xl border border-slate-200/80 bg-slate-50/70 p-3 dark:border-slate-700 dark:bg-slate-950/50'>
+                  <InfiniteSlider speed={36} speedOnHover={18} gap={12}>
+                    {tickerItems.map((item) => (
+                      <span
+                        key={item}
+                        className='inline-flex items-center rounded-xl border border-slate-300/70 bg-white px-3 py-1.5 text-xs font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </InfiniteSlider>
+                  <ProgressiveBlur
+                    className='pointer-events-none absolute inset-y-0 left-0 w-12'
+                    direction='left'
+                    blurIntensity={0.8}
+                  />
+                  <ProgressiveBlur
+                    className='pointer-events-none absolute inset-y-0 right-0 w-12'
+                    direction='right'
+                    blurIntensity={0.8}
+                  />
                 </div>
               </div>
             </div>
-            {/* Add New Expense */}
-            <AddRecord/>
+
+            <AddRecord />
           </div>
 
-          {/* Right Column - Stacked below on mobile */}
           <div className='space-y-4 sm:space-y-6'>
-            {/* Expense Analytics */}
             <RecordChart />
-            <ExpenseStats/>
+            <ExpenseStats />
           </div>
         </div>
 
-        {/* Full-width sections below - mobile-friendly spacing */}
         <div className='mt-6 sm:mt-8 space-y-4 sm:space-y-6'>
-          
           <RecordHistory />
         </div>
       </div>
-      </main>
-    
+    </main>
   );
-  
 }
 
 export default Dashboard
