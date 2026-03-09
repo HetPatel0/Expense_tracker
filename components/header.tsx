@@ -3,10 +3,10 @@ import Link from 'next/link';
 import { LogOut, Menu, ShieldCheck, Wallet, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import React from 'react';
-import { ModeToggle } from './modetoggle';
 import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { ModeToggle } from './modetoggle';
 
 const menuItems = [
   { name: 'Dashboard', href: '/' },
