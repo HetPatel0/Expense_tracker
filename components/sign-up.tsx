@@ -41,10 +41,10 @@ export default function SignUpPage() {
         }
     }
     return (
-        <section className="flex min-h-screen bg-zinc-50 px-4 py-16 md:py-32 dark:bg-transparent">
+        <section className="flex min-h-screen bg-muted/40 px-4 py-16 md:py-32">
             <form
                 onSubmit={handleSignUp}
-                className="bg-card m-auto h-fit w-full max-w-sm rounded-[calc(var(--radius)+.125rem)] border p-0.5 shadow-md dark:[--color-muted:var(--color-zinc-900)]">
+                className="bg-card m-auto h-fit w-full max-w-sm rounded-[calc(var(--radius)+.125rem)] border border-border p-0.5 shadow-md">
                 <div className="p-8 pb-6">
                     <div>
                         <Link
@@ -53,7 +53,7 @@ export default function SignUpPage() {
                            {/* logo */}
                         </Link>
                         <h1 className="mb-1 mt-4 text-xl font-semibold">Create a StackUP Account</h1>
-                        <p className="text-sm">Welcome! Create an account to get started</p>
+                        <p className="text-sm text-muted-foreground">Welcome! Create an account to get started</p>
                     </div>
 
                   
@@ -112,7 +112,7 @@ export default function SignUpPage() {
                         </div>
 
                         {errorMessage ? (
-                          <p className="text-sm text-red-600 dark:text-red-400">{errorMessage}</p>
+                          <p className="text-sm text-destructive">{errorMessage}</p>
                         ) : null}
 
                         <Button className="w-full mt-4" type='submit' disabled={isSubmitting}>  {
@@ -121,7 +121,7 @@ export default function SignUpPage() {
                     </div>
                 </div>
 
-                <div className="bg-muted rounded-lg border p-3">
+                <div className="bg-muted rounded-lg border border-border p-3">
                     <p className="text-accent-foreground text-center text-sm">
                         Have an account ?
                       

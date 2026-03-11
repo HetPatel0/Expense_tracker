@@ -2,7 +2,6 @@
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import Image from 'next/image'
-import { HeroHeader } from '@/components/header'
 import { InfiniteSlider } from '@/components/ui/infinite-slider'
 import { ProgressiveBlur } from '@/components/ui/progressive-blur'
 
@@ -39,7 +38,7 @@ export default function HeroSection() {
                         </div>
                     </div>
                 </section>
-                <section className="bg-background pb-16 md:pb-32">
+                <section id="features" className="bg-background scroll-mt-28 pb-16 md:pb-32">
                     <div className="group relative m-auto max-w-6xl px-6">
                         <div className="flex flex-col items-center md:flex-row">
                             <div className="md:max-w-44 md:border-r md:pr-6">

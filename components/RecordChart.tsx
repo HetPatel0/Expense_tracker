@@ -12,7 +12,7 @@ const chartHighlights = [
 ];
 
 const cardClass =
-  'rounded-3xl border border-slate-200/70 bg-white/75 p-4 shadow-lg shadow-slate-200/60 backdrop-blur-xl transition-all duration-300 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/70 dark:shadow-none sm:p-6';
+  'rounded-3xl border border-border/70 bg-card/75 p-4 shadow-lg backdrop-blur-xl transition-all duration-300 hover:shadow-xl sm:p-6';
 
 const RecordChart = async () => {
   const { records, error } = await getRecords();
@@ -21,19 +21,19 @@ const RecordChart = async () => {
     return (
       <div className={cardClass}>
         <div className='mb-5 flex items-center gap-3'>
-          <div className='flex h-10 w-10 items-center justify-center rounded-2xl bg-linear-to-br from-slate-800 to-slate-700 text-white shadow-lg dark:from-sky-600 dark:to-blue-600'>
+          <div className='flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg'>
             <ChartNoAxesColumn className='h-5 w-5' />
           </div>
           <div>
-            <h3 className='text-lg font-bold text-slate-900 dark:text-slate-100 sm:text-xl'>
+            <h3 className='text-lg font-bold text-foreground sm:text-xl'>
               Expense Chart
             </h3>
-            <p className='text-xs text-slate-500 dark:text-slate-400'>
+            <p className='text-xs text-muted-foreground'>
               Visual representation of your spending
             </p>
           </div>
         </div>
-        <div className='rounded-xl border border-red-200 bg-red-50/80 p-3 text-red-700 dark:border-red-900/70 dark:bg-red-950/30 dark:text-red-300 sm:p-4'>
+        <div className='rounded-xl border border-destructive/20 bg-destructive/10 p-3 text-destructive sm:p-4'>
           <p className='text-sm font-semibold'>Error loading chart data</p>
           <p className='mt-1 text-xs'>{error}</p>
         </div>
@@ -45,26 +45,26 @@ const RecordChart = async () => {
     return (
       <div className={cardClass}>
         <div className='mb-5 flex items-center gap-3'>
-          <div className='flex h-10 w-10 items-center justify-center rounded-2xl bg-linear-to-br from-slate-800 to-slate-700 text-white shadow-lg dark:from-sky-600 dark:to-blue-600'>
+          <div className='flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg'>
             <ChartNoAxesColumn className='h-5 w-5' />
           </div>
           <div>
-            <h3 className='text-lg font-bold text-slate-900 dark:text-slate-100 sm:text-xl'>
+            <h3 className='text-lg font-bold text-foreground sm:text-xl'>
               Expense Chart
             </h3>
-            <p className='text-xs text-slate-500 dark:text-slate-400'>
+            <p className='text-xs text-muted-foreground'>
               Visual representation of your spending
             </p>
           </div>
         </div>
-        <div className='rounded-xl border border-slate-200 bg-slate-50/80 p-6 text-center dark:border-slate-700 dark:bg-slate-900 sm:p-8'>
-          <div className='mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-2xl shadow-md dark:bg-slate-800'>
+        <div className='rounded-xl border border-border bg-muted/60 p-6 text-center sm:p-8'>
+          <div className='mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-background text-2xl shadow-md'>
             📈
           </div>
-          <h4 className='text-base font-bold text-slate-800 dark:text-slate-100 sm:text-lg'>
+          <h4 className='text-base font-bold text-foreground sm:text-lg'>
             No Data to Display
           </h4>
-          <p className='mx-auto mt-2 max-w-md text-sm text-slate-600 dark:text-slate-400'>
+          <p className='mx-auto mt-2 max-w-md text-sm text-muted-foreground'>
             Add some records and this chart will start showing your spending
             trends.
           </p>
@@ -74,33 +74,33 @@ const RecordChart = async () => {
   }
 
   return (
-    <div className={cardClass}>
+    <div id='trends' className={`${cardClass} scroll-mt-28`}>
       <div className='mb-5 flex items-center justify-between gap-3'>
         <div className='flex items-center gap-3'>
-          <div className='flex h-10 w-10 items-center justify-center rounded-2xl bg-linear-to-br from-slate-800 to-slate-700 text-white shadow-lg dark:from-sky-600 dark:to-blue-600'>
+          <div className='flex h-10 w-10 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg'>
             <ChartNoAxesColumn className='h-5 w-5' />
           </div>
           <div>
-            <h3 className='text-lg font-bold text-slate-900 dark:text-slate-100 sm:text-xl'>
+            <h3 className='text-lg font-bold text-foreground sm:text-xl'>
               Expense Chart
             </h3>
-            <p className='text-xs text-slate-500 dark:text-slate-400'>
+            <p className='text-xs text-muted-foreground'>
               Visual representation of your spending
             </p>
           </div>
         </div>
-        <span className='inline-flex items-center gap-1 rounded-full border border-slate-300/80 bg-slate-100/80 px-2.5 py-1 text-xs font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200'>
+        <span className='inline-flex items-center gap-1 rounded-full border border-primary/20 bg-primary/10 px-2.5 py-1 text-xs font-medium text-primary'>
           <Sparkles className='h-3.5 w-3.5' />
           Live
         </span>
       </div>
 
-      <div className='relative mb-4 overflow-hidden rounded-2xl border border-slate-300/70 bg-slate-50/80 p-2 dark:border-slate-700 dark:bg-slate-900'>
+      <div className='relative mb-4 overflow-hidden rounded-2xl border border-border/70 bg-muted/60 p-2'>
         <InfiniteSlider speed={30} speedOnHover={16} gap={8}>
           {chartHighlights.map((item) => (
             <span
               key={item}
-              className='inline-flex items-center rounded-full border border-slate-300/70 bg-white px-3 py-1 text-xs font-medium text-slate-700 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-200'
+              className='inline-flex items-center rounded-full border border-border/70 bg-background px-3 py-1 text-xs font-medium text-foreground'
             >
               {item}
             </span>
@@ -118,7 +118,7 @@ const RecordChart = async () => {
         />
       </div>
 
-      <div className='overflow-x-auto rounded-2xl border border-slate-300/70 bg-white/85 p-2 shadow-inner dark:border-slate-700 dark:bg-slate-950/40 sm:p-3'>
+      <div className='overflow-x-auto rounded-2xl border border-border/70 bg-background/85 p-2 shadow-inner sm:p-3'>
         <BarChart
           records={records.map((record) => ({
             ...record,

@@ -1,18 +1,34 @@
 'use client';
+
 import Link from 'next/link';
-import { LogOut, Menu, ShieldCheck, Wallet, X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import React from 'react';
+import { LogOut, ShieldCheck } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { authClient } from '@/lib/auth-client';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { ModeToggle } from './modetoggle';
+import {
+  MobileNav,
+  MobileNavHeader,
+  MobileNavMenu,
+  MobileNavToggle,
+  NavBody,
+  NavItems,
+  Navbar,
+  NavbarLogo,
+} from '@/components/ui/navbar';
 
-const menuItems = [
-  { name: 'Dashboard', href: '/' },
-  { name: 'Trends', href: '#trends' },
-  { name: 'Records', href: '#records' },
-  { name: 'Insights', href: '#insights' },
+const signedOutMenuItems = [
+  { name: 'Overview', link: '/' },
+  { name: 'Features', link: '/#features' },
+  { name: 'Start', link: '/signup' },
+];
+
+const signedInMenuItems = [
+  { name: 'Dashboard', link: '/' },
+  { name: 'Trends', link: '/#trends' },
+  { name: 'Insights', link: '/#insights' },
+  { name: 'Records', link: '/#records' },
 ];
 
 export const HeroHeader = () => {
@@ -20,129 +36,132 @@ export const HeroHeader = () => {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
 
-  const handleLogOut = async () => {
+  const closeMenu = React.useCallback(() => {
+    setMenuState(false);
+  }, []);
+
+  const handleLogOut = React.useCallback(async () => {
     await authClient.signOut();
+    closeMenu();
     router.push('/');
     router.refresh();
-    setMenuState(false);
-  };
+  }, [closeMenu, router]);
 
-  const authSection = isPending ? (
-    <span className='text-sm text-slate-500 dark:text-slate-400'>Loading...</span>
+  const menuItems = session ? signedInMenuItems : signedOutMenuItems;
+
+  const desktopAuthSection = isPending ? (
+    <span className='text-sm text-muted-foreground'>Loading...</span>
   ) : session ? (
     <div className='flex items-center gap-2'>
-      <div className='hidden items-center gap-1.5 rounded-full border border-slate-200/80 bg-white/70 px-3 py-1.5 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-900/75 dark:text-slate-200 sm:inline-flex'>
-        <ShieldCheck className='h-3.5 w-3.5 text-emerald-500' />
+      <div className='hidden items-center gap-1.5 rounded-full border border-border/70 bg-muted/60 px-3 py-2 text-sm font-medium text-foreground xl:inline-flex'>
+  
         Hello, {session.user.name}
       </div>
       <Button
         onClick={handleLogOut}
         variant='outline'
         size='sm'
-        className='border-slate-300 bg-white/75 text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800'
+        className='h-9 rounded-full border-border bg-background px-3 text-foreground hover:bg-accent hover:text-accent-foreground'
       >
         <LogOut className='h-4 w-4' />
+        <span className='hidden lg:inline'>Logout</span>
       </Button>
     </div>
   ) : (
-    <div className='flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit'>
+    <div className='flex items-center gap-2'>
       <Button
         asChild
         variant='outline'
         size='sm'
-        className='border-slate-300 bg-white/75 text-slate-700 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800'
+        className='h-9 rounded-full border-border bg-background px-4 text-foreground hover:bg-accent hover:text-accent-foreground'
       >
-        <Link href='/login'>
-          <span>Login</span>
-        </Link>
+        <Link href='/login'>Login</Link>
       </Button>
+      <Button asChild size='sm' className='h-9 rounded-full px-4'>
+        <Link href='/signup'>Sign Up</Link>
+      </Button>
+    </div>
+  );
+
+  const mobileAuthSection = isPending ? (
+    <span className='text-sm text-muted-foreground'>Loading...</span>
+  ) : session ? (
+    <div className='flex flex-col gap-3'>
+      <div className='inline-flex items-center gap-2 rounded-2xl border border-border/70 bg-muted/60 px-4 py-3 text-sm font-medium text-foreground'>
+        <ShieldCheck className='h-4 w-4 text-primary' />
+        Hello, {session.user.name}
+      </div>
+      <Button
+        onClick={handleLogOut}
+        variant='outline'
+        className='h-10 w-full rounded-full border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground'
+      >
+        <LogOut className='h-4 w-4' />
+        Logout
+      </Button>
+    </div>
+  ) : (
+    <div className='grid grid-cols-1 gap-2 sm:grid-cols-2'>
       <Button
         asChild
-        size='sm'
-        className='bg-linear-to-r from-slate-800 to-slate-700 text-white hover:from-slate-700 hover:to-slate-600 dark:from-sky-600 dark:to-blue-600 dark:hover:from-sky-500 dark:hover:to-blue-500'
+        variant='outline'
+        className='h-10 rounded-full border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground'
       >
-        <Link href='/signup'>
-          <span>Sign Up</span>
+        <Link href='/login' onClick={closeMenu}>
+          Login
+        </Link>
+      </Button>
+      <Button asChild className='h-10 rounded-full'>
+        <Link href='/signup' onClick={closeMenu}>
+          Sign Up
         </Link>
       </Button>
     </div>
   );
 
   return (
-    <header className='sticky top-0 z-40'>
-      <nav className='border-b border-slate-200/70 bg-white/80 backdrop-blur-xl dark:border-slate-800/80 dark:bg-slate-950/75'>
-        <div className='mx-auto max-w-7xl px-4 sm:px-6'>
-          <div className='flex items-center justify-between gap-4 py-3.5'>
-            <div className='flex items-center gap-8'>
-              <Link href='/' aria-label='home' className='flex items-center gap-2.5'>
-                <span className='flex h-10 w-10 items-center justify-center rounded-xl border border-white bg-linear-to-br from-slate-800 to-slate-700 p-1.5 shadow-sm dark:border-slate-700 dark:from-sky-500 dark:to-blue-600'>
-                  <Image src='/Stackup.png' width={30} height={30} alt='logo' />
-                </span>
-                <div className='hidden sm:block'>
-                  <p className='font-display inline-flex items-center gap-1 text-sm font-semibold text-slate-900 dark:text-slate-100'>
-                    <Wallet className='h-3.5 w-3.5' />
-                    Kharcha
-                  </p>
-                  <p className='text-[11px] text-slate-500 dark:text-slate-400'>
-                    Smart Expense Dashboard
-                  </p>
-                </div>
-              </Link>
-
-              <ul className='hidden items-center gap-1 md:flex'>
-                {menuItems.map((item) => (
-                  <li key={item.name}>
-                    <Link
-                      href={item.href}
-                      className='block rounded-lg px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors duration-200 hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100'
-                    >
-                      {item.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-
-            <div className='hidden items-center gap-3 md:flex'>
-              {authSection}
-              <ModeToggle />
-            </div>
-
-            <button
-              onClick={() => setMenuState(!menuState)}
-              aria-label={menuState ? 'Close Menu' : 'Open Menu'}
-              className='rounded-lg p-2 text-slate-700 transition-colors hover:bg-slate-100 md:hidden dark:text-slate-200 dark:hover:bg-slate-800'
-            >
-              {menuState ? <X className='h-5 w-5' /> : <Menu className='h-5 w-5' />}
-            </button>
-          </div>
+    <Navbar>
+      <NavBody>
+        <div className='flex min-w-0 items-center gap-4 lg:gap-6'>
+          <NavbarLogo />
+          <NavItems items={menuItems} />
         </div>
 
-        {menuState && (
-          <div className='border-t border-slate-200/80 bg-white/90 px-4 py-4 backdrop-blur-xl md:hidden dark:border-slate-800 dark:bg-slate-950/90'>
-            <div className='mx-auto max-w-7xl space-y-4'>
-              <ul className='grid grid-cols-2 gap-2'>
-                {menuItems.map((item) => (
-                  <li key={item.name}>
-                    <Link
-                      href={item.href}
-                      onClick={() => setMenuState(false)}
-                      className='block rounded-lg border border-slate-200/80 bg-white/70 px-3 py-2 text-sm font-medium text-slate-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200'
-                    >
-                      {item.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+        <div className='flex shrink-0 items-center gap-2 lg:gap-3'>
+          {desktopAuthSection}
+          <ModeToggle className='border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground' />
+        </div>
+      </NavBody>
 
-              <div className='flex items-center justify-between gap-3'>
-                <div className='flex-1'>{authSection}</div>
-                <ModeToggle />
-              </div>
-            </div>
+      <MobileNav>
+        <MobileNavHeader>
+          <NavbarLogo className='max-w-[calc(100%-6rem)]' />
+          <div className='flex items-center gap-2'>
+            <ModeToggle className='border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground' />
+            <MobileNavToggle
+              isOpen={menuState}
+              onClick={() => setMenuState((open) => !open)}
+            />
           </div>
-        )}
-      </nav>
-    </header>
+        </MobileNavHeader>
+
+        <MobileNavMenu isOpen={menuState}>
+          <nav className='grid gap-2'>
+            {menuItems.map((item) => (
+              <Link
+                key={item.link}
+                href={item.link}
+                onClick={closeMenu}
+                className='rounded-xl border border-border/70 bg-card/80 px-4 py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent hover:text-accent-foreground'
+              >
+                {item.name}
+              </Link>
+            ))}
+          </nav>
+
+          <div className='border-t border-border/60 pt-4'>{mobileAuthSection}</div>
+        </MobileNavMenu>
+      </MobileNav>
+    </Navbar>
   );
 };

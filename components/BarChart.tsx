@@ -11,7 +11,6 @@ import {
   Legend,
 } from 'chart.js';
 import { useState, useEffect } from 'react';
-import { useTheme } from 'next-themes';
 
 // Register Chart.js components
 ChartJS.register(
@@ -31,11 +30,18 @@ interface Record {
 }
 
 const BarChart = ({ records }: { records: Record[] }) => {
-  const { theme } = useTheme();
-  const isDark = theme === 'dark';
   const [windowWidth, setWindowWidth] = useState(() =>
     typeof window === 'undefined' ? 1024 : window.innerWidth
   );
+
+  const getThemeColor = (token: string) => {
+    if (typeof window === 'undefined') return '';
+    const value = getComputedStyle(document.documentElement)
+      .getPropertyValue(token)
+      .trim();
+
+    return value;
+  };
 
   useEffect(() => {
     // Add resize listener
@@ -97,26 +103,40 @@ const BarChart = ({ records }: { records: Record[] }) => {
 
   const aggregatedData = aggregateByDate(records);
 
+  const chartColors = {
+    high: getThemeColor('--destructive'),
+    medium: getThemeColor('--chart-3'),
+    moderate: getThemeColor('--chart-2'),
+    low: getThemeColor('--primary'),
+    tooltipBg: getThemeColor('--popover'),
+    tooltipTitle: getThemeColor('--popover-foreground'),
+    tooltipBody: getThemeColor('--muted-foreground'),
+    tooltipBorder: getThemeColor('--border'),
+    axisTitle: getThemeColor('--foreground'),
+    axisTick: getThemeColor('--muted-foreground'),
+    grid: getThemeColor('--border'),
+  };
+
   // Get color based on amount (since we're aggregating multiple categories)
   const getAmountColor = (amount: number) => {
     if (amount > 200)
       return {
-        bg: isDark ? 'rgba(255, 99, 132, 0.3)' : 'rgba(255, 99, 132, 0.2)',
-        border: isDark ? 'rgba(255, 99, 132, 0.8)' : 'rgba(255, 99, 132, 1)',
+        bg: chartColors.high,
+        border: chartColors.high,
       }; // Red for high spending
     if (amount > 100)
       return {
-        bg: isDark ? 'rgba(255, 206, 86, 0.3)' : 'rgba(255, 206, 86, 0.2)',
-        border: isDark ? 'rgba(255, 206, 86, 0.8)' : 'rgba(255, 206, 86, 1)',
+        bg: chartColors.medium,
+        border: chartColors.medium,
       }; // Yellow for medium spending
     if (amount > 50)
       return {
-        bg: isDark ? 'rgba(54, 162, 235, 0.3)' : 'rgba(54, 162, 235, 0.2)',
-        border: isDark ? 'rgba(54, 162, 235, 0.8)' : 'rgba(54, 162, 235, 1)',
+        bg: chartColors.moderate,
+        border: chartColors.moderate,
       }; // Blue for moderate spending
     return {
-      bg: isDark ? 'rgba(75, 192, 192, 0.3)' : 'rgba(75, 192, 192, 0.2)',
-      border: isDark ? 'rgba(75, 192, 192, 0.8)' : 'rgba(75, 192, 192, 1)',
+      bg: chartColors.low,
+      border: chartColors.low,
     }; // Green for low spending
   };
 
@@ -153,12 +173,10 @@ const BarChart = ({ records }: { records: Record[] }) => {
         display: false, // Remove chart title
       },
       tooltip: {
-        backgroundColor: isDark
-          ? 'rgba(31, 41, 55, 0.95)'
-          : 'rgba(255, 255, 255, 0.95)',
-        titleColor: isDark ? '#f9fafb' : '#1f2937',
-        bodyColor: isDark ? '#d1d5db' : '#374151',
-        borderColor: isDark ? '#374151' : '#e5e7eb',
+        backgroundColor: chartColors.tooltipBg,
+        titleColor: chartColors.tooltipTitle,
+        bodyColor: chartColors.tooltipBody,
+        borderColor: chartColors.tooltipBorder,
         borderWidth: 1,
         cornerRadius: 8,
         callbacks: {
@@ -183,13 +201,13 @@ const BarChart = ({ records }: { records: Record[] }) => {
             size: isMobile ? 12 : 14,
             weight: 'bold' as const,
           },
-          color: isDark ? '#d1d5db' : '#2c3e50',
+          color: chartColors.axisTitle,
         },
         ticks: {
           font: {
             size: isMobile ? 10 : 12,
           },
-          color: isDark ? '#9ca3af' : '#7f8c8d', // Gray x-axis labels
+          color: chartColors.axisTick,
           maxRotation: isMobile ? 45 : 0, // Rotate labels on mobile
           minRotation: isMobile ? 45 : 0,
         },
@@ -205,19 +223,19 @@ const BarChart = ({ records }: { records: Record[] }) => {
             size: isMobile ? 12 : 16, // Smaller font on mobile
             weight: 'bold' as const,
           },
-          color: isDark ? '#d1d5db' : '#2c3e50',
+          color: chartColors.axisTitle,
         },
         ticks: {
           font: {
             size: isMobile ? 10 : 12, // Smaller font on mobile
           },
-          color: isDark ? '#9ca3af' : '#7f8c8d', // Gray y-axis labels
+          color: chartColors.axisTick,
           callback: function (value: string | number) {
             return 'Rs' + value; // Add dollar sign to y-axis labels
           },
         },
         grid: {
-          color: isDark ? '#374151' : '#e0e0e0', // Dark mode grid lines
+          color: chartColors.grid,
         },
         beginAtZero: true, // Start y-axis at zero for expenses
       },
