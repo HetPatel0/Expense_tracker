@@ -3,14 +3,27 @@
 import {
   ExpenseRecord,
   ExpenseSuggestion,
+  getAIBlockState,
   generateExpenseDigest,
   getAIModelName,
+  isAIRateLimitError,
   isAIConfigured,
 } from '@/lib/ai';
 import { db } from '@/lib/db';
 import { getSession } from '@/lib/server';
 
 type DigestStatus = 'ready' | 'missing-key' | 'fallback' | 'empty' | 'error';
+const DIGEST_CACHE_TTL_MS = 15 * 60 * 1000;
+
+interface CachedDigestEntry {
+  expiresAt: number;
+  fingerprint: string;
+  value: ExpenseDigestView;
+}
+
+declare global {
+  var __expenseDigestCache: Map<string, CachedDigestEntry> | undefined;
+}
 
 export interface ExpenseDigestView {
   averageExpense: number;
@@ -37,6 +50,58 @@ interface ExpenseSnapshot {
 
 function formatCurrency(value: number) {
   return `Rs ${value.toFixed(2)}`;
+}
+
+function formatRetryTime(timestamp: number) {
+  return new Date(timestamp).toLocaleString();
+}
+
+function getDigestCache() {
+  if (!globalThis.__expenseDigestCache) {
+    globalThis.__expenseDigestCache = new Map();
+  }
+
+  return globalThis.__expenseDigestCache;
+}
+
+function buildExpenseFingerprint(expenses: ExpenseRecord[]) {
+  return JSON.stringify(
+    expenses.map((expense) => ({
+      id: expense.id,
+      amount: expense.amount,
+      category: expense.category,
+      date: expense.date,
+      description: expense.description,
+    }))
+  );
+}
+
+function getCachedDigest(userId: string, fingerprint: string) {
+  const cache = getDigestCache();
+  const entry = cache.get(userId);
+
+  if (!entry) {
+    return null;
+  }
+
+  if (Date.now() > entry.expiresAt || entry.fingerprint !== fingerprint) {
+    cache.delete(userId);
+    return null;
+  }
+
+  return entry.value;
+}
+
+function setCachedDigest(
+  userId: string,
+  fingerprint: string,
+  value: ExpenseDigestView
+) {
+  getDigestCache().set(userId, {
+    expiresAt: Date.now() + DIGEST_CACHE_TTL_MS,
+    fingerprint,
+    value,
+  });
 }
 
 function buildExpenseSnapshot(expenses: ExpenseRecord[]): ExpenseSnapshot {
@@ -192,6 +257,8 @@ function mergeSuggestions(
 
 export async function getExpenseDigest(): Promise<ExpenseDigestView> {
   let snapshot: ExpenseSnapshot | null = null;
+  let userId: string | null = null;
+  let fingerprint = '';
 
   try {
     const user = await getSession().then((session) => session?.user);
@@ -209,6 +276,8 @@ export async function getExpenseDigest(): Promise<ExpenseDigestView> {
         totalSpent: 0,
       };
     }
+
+    userId = user.id;
 
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
@@ -266,8 +335,10 @@ export async function getExpenseDigest(): Promise<ExpenseDigestView> {
     }
 
     snapshot = buildExpenseSnapshot(expenseData);
+    fingerprint = buildExpenseFingerprint(expenseData);
     const fallbackSuggestions = buildFallbackSuggestions(snapshot);
     const fallbackSummary = buildFallbackSummary(snapshot);
+    const cachedDigest = getCachedDigest(user.id, fingerprint);
 
     if (!isAIConfigured()) {
       return {
@@ -283,9 +354,39 @@ export async function getExpenseDigest(): Promise<ExpenseDigestView> {
       };
     }
 
+    const aiBlockState = getAIBlockState();
+
+    if (aiBlockState) {
+      if (cachedDigest) {
+        return {
+          ...cachedDigest,
+          note: `Using cached AI summary while the free provider is rate-limited until ${formatRetryTime(aiBlockState.nextRetryAt)}.`,
+        };
+      }
+
+      return {
+        averageExpense: snapshot.averageExpense,
+        model: getAIModelName(),
+        note: `Free AI provider is rate-limited until ${formatRetryTime(aiBlockState.nextRetryAt)}. Showing local fallback summary.`,
+        recordCount: snapshot.recordCount,
+        status: 'fallback',
+        suggestions: fallbackSuggestions,
+        summary: fallbackSummary,
+        topCategory: snapshot.topCategory,
+        totalSpent: snapshot.totalSpent,
+      };
+    }
+
+    if (cachedDigest) {
+      return {
+        ...cachedDigest,
+        note: `Using cached AI summary from ${getAIModelName()} to avoid unnecessary provider calls.`,
+      };
+    }
+
     const digest = await generateExpenseDigest(expenseData);
 
-    return {
+    const readyDigest: ExpenseDigestView = {
       averageExpense: snapshot.averageExpense,
       model: getAIModelName(),
       note: `Generated with ${getAIModelName()}.`,
@@ -296,14 +397,36 @@ export async function getExpenseDigest(): Promise<ExpenseDigestView> {
       topCategory: snapshot.topCategory,
       totalSpent: snapshot.totalSpent,
     };
+
+    setCachedDigest(user.id, fingerprint, readyDigest);
+
+    return readyDigest;
   } catch (error) {
-    console.error('Error building expense digest:', error);
+    const rateLimited = isAIRateLimitError(error);
+
+    if (rateLimited) {
+      console.warn('AI provider rate-limited expense digest requests; using fallback.');
+    } else {
+      console.error('Error building expense digest:', error);
+    }
 
     if (snapshot) {
+      if (userId && fingerprint) {
+        const cachedDigest = getCachedDigest(userId, fingerprint);
+        if (cachedDigest) {
+          return {
+            ...cachedDigest,
+            note: 'Using cached AI summary because the provider is temporarily unavailable.',
+          };
+        }
+      }
+
       return {
         averageExpense: snapshot.averageExpense,
         model: null,
-        note: 'AI summary temporarily unavailable, so a local fallback summary is being shown.',
+        note: rateLimited
+          ? 'Free AI provider is rate-limited, so a local fallback summary is being shown.'
+          : 'AI summary temporarily unavailable, so a local fallback summary is being shown.',
         recordCount: snapshot.recordCount,
         status: 'fallback',
         suggestions: buildFallbackSuggestions(snapshot),
@@ -316,7 +439,9 @@ export async function getExpenseDigest(): Promise<ExpenseDigestView> {
     return {
       averageExpense: 0,
       model: null,
-      note: 'AI summary temporarily unavailable.',
+      note: rateLimited
+        ? 'Free AI provider is rate-limited.'
+        : 'AI summary temporarily unavailable.',
       recordCount: 0,
       status: 'fallback',
       suggestions: [

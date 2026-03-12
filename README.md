@@ -26,16 +26,18 @@ The dashboard includes an AI expense summary panel below the expense history lis
 
 1. Copy `.env.example` values into your local `.env`.
 2. Paste your API key into `AI_API_KEY`.
-3. Keep `AI_BASE_URL=https://openrouter.ai/api/v1` and `AI_MODEL=openrouter/free` if you want the default free setup.
+3. Keep `AI_BASE_URL=https://openrouter.ai/api/v1` and `AI_MODEL=mistralai/mistral-small-3.1-24b-instruct:free` for the default free setup.
 
 ```bash
 AI_API_KEY=your_key_here
 AI_BASE_URL=https://openrouter.ai/api/v1
-AI_MODEL=openrouter/free
+AI_MODEL=mistralai/mistral-small-3.1-24b-instruct:free
+AI_TIMEOUT_MS=8000
+AI_RATE_LIMIT_COOLDOWN_MS=600000
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-If `AI_API_KEY` is missing, the app falls back to a local rule-based summary instead of an LLM-generated one.
+If `AI_API_KEY` is missing, the free model times out, or OpenRouter returns `429`, the app falls back to a local summary and temporarily stops retrying the provider on every page load.
 
 ## Learn More
 

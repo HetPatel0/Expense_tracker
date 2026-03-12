@@ -20,8 +20,21 @@ interface RawExpenseSuggestion {
 }
 
 const DEFAULT_OPENROUTER_BASE_URL = 'https://openrouter.ai/api/v1';
-const DEFAULT_OPENROUTER_MODEL = 'openrouter/free';
+const OPENROUTER_FREE_ROUTER_MODEL = 'openrouter/free';
+const DEFAULT_OPENROUTER_MODEL =
+  'mistralai/mistral-small-3.1-24b-instruct:free';
 const DEFAULT_OPENAI_MODEL = 'gpt-4.1-nano';
+const DEFAULT_AI_TIMEOUT_MS = 8000;
+const DEFAULT_AI_COOLDOWN_MS = 10 * 60 * 1000;
+
+type AICircuitState = {
+  nextRetryAt: number;
+  reason: string;
+};
+
+declare global {
+  var __expenseTrackerAICircuit: AICircuitState | undefined;
+}
 
 export interface ExpenseRecord {
   id: string;
@@ -65,18 +78,27 @@ function resolveAIConfig() {
         process.env.AI_API_KEY?.startsWith('sk-or-v1-')
     );
 
+  const configuredModel = process.env.AI_MODEL;
+  const normalizedModel =
+    !configuredModel || configuredModel === OPENROUTER_FREE_ROUTER_MODEL
+      ? useOpenRouter
+        ? DEFAULT_OPENROUTER_MODEL
+        : DEFAULT_OPENAI_MODEL
+      : configuredModel;
+
   return {
     apiKey,
-    baseURL: explicitBaseURL || (useOpenRouter ? DEFAULT_OPENROUTER_BASE_URL : undefined),
-    model:
-      process.env.AI_MODEL ||
-      (useOpenRouter ? DEFAULT_OPENROUTER_MODEL : DEFAULT_OPENAI_MODEL),
+    baseURL:
+      explicitBaseURL || (useOpenRouter ? DEFAULT_OPENROUTER_BASE_URL : undefined),
+    model: normalizedModel,
+    cooldownMs: Number(process.env.AI_RATE_LIMIT_COOLDOWN_MS || DEFAULT_AI_COOLDOWN_MS),
+    timeoutMs: Number(process.env.AI_TIMEOUT_MS || DEFAULT_AI_TIMEOUT_MS),
     useOpenRouter,
   };
 }
 
 function getAIClient() {
-  const { apiKey, baseURL, useOpenRouter } = resolveAIConfig();
+  const { apiKey, baseURL, timeoutMs, useOpenRouter } = resolveAIConfig();
 
   if (!apiKey) {
     throw new Error(
@@ -86,6 +108,8 @@ function getAIClient() {
 
   return new OpenAI({
     apiKey,
+    maxRetries: 0,
+    timeout: timeoutMs,
     ...(baseURL ? { baseURL } : {}),
     ...(useOpenRouter
       ? {
@@ -97,6 +121,128 @@ function getAIClient() {
         }
       : {}),
   });
+}
+
+function getAICircuitState() {
+  return globalThis.__expenseTrackerAICircuit;
+}
+
+function setAICircuitState(state: AICircuitState | undefined) {
+  globalThis.__expenseTrackerAICircuit = state;
+}
+
+export function getAIBlockState() {
+  const state = getAICircuitState();
+
+  if (!state) {
+    return null;
+  }
+
+  if (Date.now() >= state.nextRetryAt) {
+    setAICircuitState(undefined);
+    return null;
+  }
+
+  return state;
+}
+
+export function isAIRateLimitError(error: unknown) {
+  if (!error || typeof error !== 'object') {
+    return false;
+  }
+
+  const maybeError = error as {
+    code?: number | string;
+    message?: string;
+    status?: number;
+  };
+
+  return (
+    maybeError.status === 429 ||
+    maybeError.code === 429 ||
+    maybeError.code === '429' ||
+    maybeError.message?.includes('429') === true ||
+    maybeError.message?.toLowerCase().includes('rate limit') === true
+  );
+}
+
+function ensureAIRequestAllowed() {
+  const state = getAIBlockState();
+
+  if (!state) {
+    return;
+  }
+
+  throw new Error(
+    `AI temporarily unavailable until ${new Date(state.nextRetryAt).toISOString()} (${state.reason}).`
+  );
+}
+
+async function runAIRequest<T>(operation: () => Promise<T>) {
+  ensureAIRequestAllowed();
+
+  try {
+    return await operation();
+  } catch (error) {
+    if (isAIRateLimitError(error)) {
+      const { cooldownMs } = resolveAIConfig();
+      setAICircuitState({
+        nextRetryAt: Date.now() + cooldownMs,
+        reason: 'provider rate limit',
+      });
+    }
+
+    throw error;
+  }
+}
+
+function extractMessageText(content: unknown) {
+  if (typeof content === 'string') {
+    return content.trim();
+  }
+
+  if (!Array.isArray(content)) {
+    return '';
+  }
+
+  return content
+    .map((part) => {
+      if (typeof part === 'string') {
+        return part;
+      }
+
+      if (part && typeof part === 'object' && 'text' in part) {
+        const text = (part as { text?: unknown }).text;
+        return typeof text === 'string' ? text : '';
+      }
+
+      return '';
+    })
+    .join('\n')
+    .trim();
+}
+
+function getCompletionText(completion: OpenAI.Chat.Completions.ChatCompletion) {
+  const choice = completion.choices[0];
+  const message = choice?.message;
+  const content = extractMessageText(message?.content);
+
+  if (content) {
+    return content;
+  }
+
+  const refusal =
+    message && 'refusal' in message && typeof message.refusal === 'string'
+      ? message.refusal.trim()
+      : '';
+
+  if (refusal) {
+    throw new Error(`Model refused the request: ${refusal}`);
+  }
+
+  throw new Error(
+    `No text response from AI (finish_reason: ${choice?.finish_reason || 'unknown'}).`
+  );
 }
 
 function extractJSONPayload(response: string) {
@@ -256,28 +402,26 @@ Focus on:
 
 Return only valid JSON array, no additional text.`;
 
-    const completion = await openai.chat.completions.create({
-      model: getAIModelName(),
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are a financial advisor AI that analyzes spending patterns and provides actionable insights. Always respond with valid JSON only.',
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      temperature: 0.4,
-      max_tokens: 900,
-    });
+    const completion = await runAIRequest(() =>
+      openai.chat.completions.create({
+        model: getAIModelName(),
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You are a financial advisor AI that analyzes spending patterns and provides actionable insights. Always respond with valid JSON only.',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        temperature: 0.4,
+        max_tokens: 900,
+      })
+    );
 
-    const response = completion.choices[0].message.content;
-    if (!response) {
-      throw new Error('No response from AI');
-    }
-
+    const response = getCompletionText(completion);
     const parsedInsights = JSON.parse(extractJSONPayload(response));
     if (!Array.isArray(parsedInsights)) {
       throw new Error('Invalid insight format');
@@ -337,28 +481,26 @@ Rules:
 - Return exactly 3 suggestions.
 - Do not wrap the JSON in markdown.`;
 
-  const completion = await openai.chat.completions.create({
-    model: getAIModelName(),
-    messages: [
-      {
-        role: 'system',
-        content:
-          'You are an expense coach. Respond with valid JSON only. Keep the output concise, specific, and actionable.',
-      },
-      {
-        role: 'user',
-        content: prompt,
-      },
-    ],
-    temperature: 0.3,
-    max_tokens: 700,
-  });
+  const completion = await runAIRequest(() =>
+    openai.chat.completions.create({
+      model: getAIModelName(),
+      messages: [
+        {
+          role: 'system',
+          content:
+            'You are an expense coach. Respond with valid JSON only. Keep the output concise, specific, and actionable.',
+        },
+        {
+          role: 'user',
+          content: prompt,
+        },
+      ],
+      temperature: 0.3,
+      max_tokens: 700,
+    })
+  );
 
-  const response = completion.choices[0].message.content;
-  if (!response) {
-    throw new Error('No response from AI');
-  }
-
+  const response = getCompletionText(completion);
   const parsedDigest = JSON.parse(
     extractJSONPayload(response)
   ) as RawExpenseDigest;
@@ -388,24 +530,26 @@ Rules:
 export async function categorizeExpense(description: string): Promise<string> {
   try {
     const openai = getAIClient();
-    const completion = await openai.chat.completions.create({
-      model: getAIModelName(),
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are an expense categorization AI. Categorize expenses into one of these categories: Food, Transportation, Entertainment, Shopping, Bills, Healthcare, Other. Respond with only the category name.',
-        },
-        {
-          role: 'user',
-          content: `Categorize this expense: "${description}"`,
-        },
-      ],
-      temperature: 0.1,
-      max_tokens: 20,
-    });
+    const completion = await runAIRequest(() =>
+      openai.chat.completions.create({
+        model: getAIModelName(),
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You are an expense categorization AI. Categorize expenses into one of these categories: Food, Transportation, Entertainment, Shopping, Bills, Healthcare, Other. Respond with only the category name.',
+          },
+          {
+            role: 'user',
+            content: `Categorize this expense: "${description}"`,
+          },
+        ],
+        temperature: 0.1,
+        max_tokens: 20,
+      })
+    );
 
-    const category = completion.choices[0].message.content?.trim();
+    const category = getCompletionText(completion);
 
     const validCategories = [
       'Food',
@@ -452,28 +596,26 @@ Provide a concise answer that:
 
 Return only the answer text, no additional formatting.`;
 
-    const completion = await openai.chat.completions.create({
-      model: getAIModelName(),
-      messages: [
-        {
-          role: 'system',
-          content:
-            'You are a helpful financial advisor AI that provides specific, actionable answers based on expense data. Be concise and direct.',
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      temperature: 0.4,
-      max_tokens: 220,
-    });
+    const completion = await runAIRequest(() =>
+      openai.chat.completions.create({
+        model: getAIModelName(),
+        messages: [
+          {
+            role: 'system',
+            content:
+              'You are a helpful financial advisor AI that provides specific, actionable answers based on expense data. Be concise and direct.',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        temperature: 0.4,
+        max_tokens: 220,
+      })
+    );
 
-    const response = completion.choices[0].message.content;
-    if (!response) {
-      throw new Error('No response from AI');
-    }
-
+    const response = getCompletionText(completion);
     return response.trim();
   } catch (error) {
     console.error('Error generating AI answer:', error);
