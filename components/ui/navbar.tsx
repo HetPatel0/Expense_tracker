@@ -206,7 +206,7 @@ export const NavbarLogo = ({ className }: { className?: string }) => {
       </span>
       <span className='min-w-0'>
         <span className='block truncate text-sm font-semibold leading-none text-foreground sm:text-base'>
-          Kharcha
+          StacksUp
         </span>
         <span className='mt-1 hidden text-xs text-muted-foreground sm:block'>
           Smart Expense Dashboard

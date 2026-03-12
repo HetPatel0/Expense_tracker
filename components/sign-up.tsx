@@ -52,7 +52,7 @@ export default function SignUpPage() {
                             aria-label="go home">
                            {/* logo */}
                         </Link>
-                        <h1 className="mb-1 mt-4 text-xl font-semibold">Create a StackUP Account</h1>
+                        <h1 className="mb-1 mt-4 text-xl font-semibold">Create a StacksUP Account</h1>
                         <p className="text-sm text-muted-foreground">Welcome! Create an account to get started</p>
                     </div>
 

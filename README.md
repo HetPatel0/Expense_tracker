@@ -20,6 +20,23 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## AI Setup
+
+The dashboard includes an AI expense summary panel below the expense history list.
+
+1. Copy `.env.example` values into your local `.env`.
+2. Paste your API key into `AI_API_KEY`.
+3. Keep `AI_BASE_URL=https://openrouter.ai/api/v1` and `AI_MODEL=openrouter/free` if you want the default free setup.
+
+```bash
+AI_API_KEY=your_key_here
+AI_BASE_URL=https://openrouter.ai/api/v1
+AI_MODEL=openrouter/free
+NEXT_PUBLIC_APP_URL=http://localhost:3000
+```
+
+If `AI_API_KEY` is missing, the app falls back to a local rule-based summary instead of an LLM-generated one.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

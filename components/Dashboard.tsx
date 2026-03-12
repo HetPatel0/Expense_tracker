@@ -1,7 +1,9 @@
+import { Suspense } from 'react';
 import { getSession } from '@/lib/server';
 import AddRecord from './AddNewRecord';
 import RecordChart from './RecordChart';
 import ExpenseStats from './ExpenseStats';
+import ExpenseDigest, { ExpenseDigestFallback } from './ExpenseDigest';
 import RecordHistory from './RecordHistory';
 import { InfiniteSlider } from './ui/infinite-slider';
 import { ProgressiveBlur } from './ui/progressive-blur';
@@ -122,10 +124,13 @@ async function Dashboard() {
 
         <div className='mt-6 sm:mt-8 space-y-4 sm:space-y-6'>
           <RecordHistory />
+          <Suspense fallback={<ExpenseDigestFallback />}>
+            <ExpenseDigest />
+          </Suspense>
         </div>
       </div>
     </main>
   );
 }
 
-export default Dashboard
+export default Dashboard;

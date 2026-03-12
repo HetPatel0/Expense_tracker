@@ -58,7 +58,7 @@ export const HeroHeader = () => {
         Hello, {session.user.name}
       </div>
       <Button
-        onClick={handleLogOut}
+        onC={handleLogOut}
         variant='outline'
         size='sm'
         className='h-9 rounded-full border-border bg-background px-3 text-foreground hover:bg-accent hover:text-accent-foreground'

@@ -54,7 +54,7 @@ export default function LoginPage() {
                             aria-label="go home">
                             {/* logog here */}
                         </Link>
-                        <h1 className="mb-1 mt-4 text-xl font-semibold">Sign In to StackUP</h1>
+                        <h1 className="mb-1 mt-4 text-xl font-semibold">Sign In to StacksUP</h1>
                         <p className="text-sm text-muted-foreground">Welcome back! Sign in to continue</p>
                     </div>
 
